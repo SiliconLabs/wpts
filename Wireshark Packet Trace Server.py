@@ -1,4 +1,3 @@
-
 import sys
 import glob
 import serial
@@ -17,8 +16,6 @@ ZEP_PORT  = 17754
 def writeAndCheckRead(command,ser):
 	ser.write(command.encode())
 	readData = ser.readline()
-	#print(readData.decode().replace("> ",""))
-	#print(writeData)
 	readData = readData.decode().replace("> ","")
 	writeData = ''.join(char for char in command if char.isalnum())
 	readData = ''.join(char for char in readData if char.isalnum())
@@ -26,10 +23,10 @@ def writeAndCheckRead(command,ser):
 
 	
 def findKey(dict,key):
-    if key in dict.keys():
-        return True,list(dict.keys()).index(key)
-    else:
-        return False,255
+	if key in dict.keys():
+		return True,list(dict.keys()).index(key)
+	else:
+		return False,255
 
 
 def parse_received_frame(Readdata,packetCount):
@@ -82,23 +79,23 @@ def parse_received_frame(Readdata,packetCount):
 
 
 def get_serial_ports():
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    else:
-        raise EnvironmentError('Unsupported platform')
+	if sys.platform.startswith('win'):
+		ports = ['COM%s' % (i + 1) for i in range(256)]
+	elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+		# this excludes your current terminal "/dev/tty"
+		ports = glob.glob('/dev/tty[A-Za-z]*')
+	else:
+		raise EnvironmentError('Unsupported platform')
 
-    result = []
-    for port in ports:
-        try:
-            s = serial.Serial(port)
-            s.close()
-            result.append(port)
-        except (OSError, serial.SerialException):
-            pass
-    return result
+	result = []
+	for port in ports:
+		try:
+			s = serial.Serial(port)
+			s.close()
+			result.append(port)
+		except (OSError, serial.SerialException):
+			pass
+	return result
 
 
 if __name__ == '__main__':
@@ -113,9 +110,9 @@ if __name__ == '__main__':
 		else:
 			try:
 				ser = serial.Serial( # set parameters, in fact use your own :-)
-    								wireshark_port,
-    								baudrate=BAUD_RATE,
-    								timeout=1
+									wireshark_port,
+									baudrate=BAUD_RATE,
+									timeout=1
 				)
 				ser.isOpen() # try to open port, if possible print message and proceed with 'while True:'
 				print ("port is opened!")
@@ -134,46 +131,40 @@ if __name__ == '__main__':
 		else:
 			break
 
-    #configure the sniffer or the railtest application
+	#configure the sniffer or the railtest application
 	writeData,readData = writeAndCheckRead("rx 0\r\n",ser)
 	if(writeData == readData):
 		returnString = ser.readline().decode()
-		#print(returnString)
 		writeData,readData = writeAndCheckRead("config2p4GHz802154\r\n",ser)	
 	else:
 		raise Exception(writeData)
 	
 	if(writeData == readData):
 		returnString = ser.readline().decode()
-		#print(returnString)
 		writeData,readData = writeAndCheckRead("enable802154 rx 100 192 864\r\n",ser)	
 	else:
 		raise Exception(writeData)
 
 	if(writeData == readData):
 		returnString = ser.readline().decode()
-		#print(returnString)
 		writeData,readData = writeAndCheckRead("setPromiscuousMode 1\r\n",ser)
 	else:
 		raise Exception(writeData)
 	
 	if(writeData == readData):
 		returnString = ser.readline().decode()
-		#print(returnString)
 		writeData,readData = writeAndCheckRead("setChannel " + channel + "\r\n",ser)
 	else:
 		raise Exception(writeData)		
 	
 	if(writeData == readData):
 		returnString = ser.readline().decode()
-		#print(returnString)
 		writeData,readData = writeAndCheckRead("rx 1",ser)
 	else:
 		raise Exception(writeData)
 	
 	if(writeData == readData):
 		Readdata = ser.readline().decode()
-		#print(Readdata)		
 		
 	else:
 		raise Exception(writeData)
@@ -183,8 +174,9 @@ if __name__ == '__main__':
                      socket.SOCK_DGRAM) # UDP
 	sock.bind(('', ZEP_PORT))
 	packetCount = 0
+	writeData,readData = writeAndCheckRead("\r\n",ser)
 	while 1:
-		Readdata = ser.readline().decode()
+		Readdata = ser.readline().decode().replace("> ","")
 		frame = parse_received_frame(Readdata,packetCount)
 		
 		#print(frame)
